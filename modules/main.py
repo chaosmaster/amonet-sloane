@@ -3,6 +3,7 @@ import sys
 import struct
 import os
 import sys
+import time
 
 from common import Device
 from handshake import handshake
@@ -125,6 +126,9 @@ def main():
     flash_binary(dev, "../bin/boot0short.img", 0)
     flash_binary(dev, "../bin/preloader.bin", 520)
 
+    # 10.1) Wait some time so data is flushed to EMMC
+    time.sleep(5)
+
     # Reboot (to fastboot)
     log("Reboot to unlocked fastboot")
     dev.reboot()
@@ -132,3 +136,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
