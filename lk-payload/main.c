@@ -23,8 +23,8 @@ void _putchar(char character)
     low_uart_put(character);
 }
 
-int (*original_read)(struct device_t *dev, uint64_t block_off, void *dst, size_t sz, int part) = (void*)0x4BD14271;
-int (*app)() = (void*)0x4BD2CBC1;
+int (*original_read)(struct device_t *dev, uint64_t block_off, void *dst, size_t sz, int part) = (void*)0x41e04375;
+int (*app)() = (void*)0x41e3b111;
 
 uint64_t g_boot, g_boot_x, g_lk, g_misc, g_recovery, g_recovery_x;
 
@@ -35,9 +35,13 @@ int read_func(struct device_t *dev, uint64_t block_off, void *dst, size_t sz, in
     printf("dev 0x%08X dst 0x%08X sz 0x%08X part 0x%08X\n", dev, dst, sz, part);
     int ret = 0;
     if(block_off == g_boot * 0x200) {
-      block_off = g_boot_x * 0x200;
+        block_off = g_boot_x * 0x200;
+    } else if(block_off == (g_boot * 0x200) + 0x800) {
+        block_off = (g_boot_x * 0x200) + 0x800;
     } else if(block_off == g_recovery * 0x200) {
-      block_off = g_recovery_x * 0x200;
+        block_off = g_recovery_x * 0x200;
+    } else if(block_off == (g_recovery * 0x200) + 0x800) {
+        block_off = (g_recovery_x * 0x200) + 0x800;
     }
     return original_read(dev, block_off, dst, sz, part);
 }
@@ -75,8 +79,11 @@ static void parse_gpt() {
 
 int main() {
     int ret = 0;
+    // We need to clean the cache first, since we jumped straight to the payload
+    cache_clean((void *)PAYLOAD_DST, PAYLOAD_SIZE);
+
     printf("This is LK-payload by xyz. Copyright 2019\n");
-    printf("64-Bit version for suez by k4y0z. Copyright 2019\n");
+    printf("Version for sloane by k4y0z and t0x1cSH. Copyright 2020\n");
 
     int fastboot = 0;
 
@@ -88,20 +95,20 @@ int main() {
         fastboot = 1;
     }
 
-    unsigned char overwritten[] = {
-        0x50, 0x7c, 0x06, 0x00, 0x44, 0x7c, 0x06, 0x00
-    };
-    memcpy((void*)0x4BD003DC, overwritten, sizeof(overwritten));
-
-    uint32_t **argptr = (void*)0x4BD00020;
-    *argptr = (void*)0x4be7f288;
-
-    uint8_t bootloader_msg[0x10] = { 0 };
-    void *lk_dst = (void*)0x4BD00000;
-
-    #define LK_SIZE (0x800 * 0x200)
+    uint8_t bootloader_msg[0x20] = { 0 };
 
     struct device_t *dev = get_device();
+
+    // Restore the 0x41E00000-0x41E50000 range, a part of it was overwritten
+    // this is way more than we actually need to restore, but it shouldn't hurt
+    dev->read(dev, g_lk * 0x200 + 0x200, (char*)LK_BASE, 0x50000, USER_PART); // +0x200 to skip lk header
+
+    // Restore argptr
+    uint32_t **argptr = (void*)0x41e00020;
+    *argptr = (void*)0x4207f288;
+
+    printf("g_boot_mode %u\n", *g_boot_mode);
+    printf("f_boot_mode %u\n", *f_boot_mode);
 
     // factory and factory advanced boot
     if(*g_boot_mode == 4 ) {
@@ -115,7 +122,7 @@ int main() {
 
     else if(g_misc) {
       // Read amonet-flag from MISC partition
-      dev->read(dev, g_misc * 0x200, bootloader_msg, 0x10, USER_PART);
+      dev->read(dev, g_misc * 0x200, bootloader_msg, 0x20, USER_PART);
       //dev->read(dev, g_misc * 0x200 + 0x4000, bootloader_msg, 0x10, USER_PART);
       printf("bootloader_msg: %s\n", bootloader_msg);
 
@@ -138,6 +145,16 @@ int main() {
           fastboot = 1;
         }
       }
+
+      // UART flag on MISC
+      if(strncmp(bootloader_msg + 0x10, "UART_PLEASE", 11) == 0) {
+        // Force uart enable
+        char* disable_uart = (char*)0x41e58758;
+        strcpy(disable_uart, " printk.disable_uart=0");
+        char* disable_uart2 = (char*)0x41e58e84;
+        strcpy(disable_uart, "printk.disable_uart=0");
+      }
+
     }
 
 #ifdef RELOAD_LK
@@ -151,33 +168,26 @@ int main() {
     if (fastboot) {
         printf("well since you're asking so nicely...\n");
 
-        patch = (void*)0x4BD2CC00;
-        *patch = 0xE006;
+        video_printf("=> HACKED FASTBOOT mode: (%d) - xyz, k4y0z, t0x1cSH\n", *g_boot_mode);
 
-        video_printf("=> HACKED FASTBOOT mode: (%d) - xyz, k4y0z\n", *g_boot_mode);
+	*g_boot_mode = 99;
     }
     else if(*g_boot_mode == 2) {
       video_printf("=> RECOVERY mode...");
     }
 
-    printf("g_boot_mode %u\n", *g_boot_mode);
-
     // device is unlocked
-    patch = (void*)0x4BD042BC;
+    patch = (void*)0x41e42a64;
     *patch++ = 0x2001; // movs r0, #1
     *patch = 0x4770;   // bx lr
 
     // amzn_verify_limited_unlock (to set androidboot.unlocked_kernel=true)
-    patch = (void*)0x4BD04484;
+    patch = (void*)0x41e3a244;
     *patch++ = 0x2000; // movs r0, #0
     *patch = 0x4770;   // bx lr
 
     //printf("(void*)dev->read 0x%08X\n", (void*)dev->read);
     //printf("(void*)&dev->read 0x%08X\n", (void*)&dev->read);
-
-    // Force uart enable
-    char* disable_uart = (char*)0x4BD59701;
-    strcpy(disable_uart, "printk.disable_uart=0");
 
     uint32_t *patch32;
 
@@ -185,22 +195,14 @@ int main() {
 
     original_read = (void*)dev->read;
 
-    patch32 = (void*)0x4BD630E4;
+    patch32 = (void*)0x41e688d0;
     *patch32 = (uint32_t)read_func;
 
     patch32 = (void*)&dev->read;
     *patch32 = (uint32_t)read_func;
 
-    // patch max-download-size to accommodate for payload
-    patch32 = (void*)0x4BD2D55C;
-    *patch32 = 0x0380F50E; // ADD.W	R3, LR, #0x400000
-
-    // Force 64-bit kernel
-    patch32 = (void*)0x4BD701A0;
-    *patch32 = 1;
-
     printf("Clean lk\n");
-    cache_clean(lk_dst, LK_SIZE);
+    cache_clean((void *)LK_BASE, LK_SIZE);
 
 #ifdef RELOAD_LK
     printf("About to jump to LK\n");
@@ -212,7 +214,7 @@ int main() {
         "mov r4, %0\n" 
         "mov r3, %1\n"
         "blx r3\n"
-        : : "r" (arg), "r" (lk_dst) : "r3", "r4");
+        : : "r" (arg), "r" (LK_BASE) : "r3", "r4");
 
     printf("Failure\n");
 #else
