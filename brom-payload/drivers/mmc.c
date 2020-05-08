@@ -1,5 +1,7 @@
 #include <inttypes.h>
 #include "../libc.h"
+#include "../crypto/gcpu.h"
+#include "../crypto/mtk_crypto.h"
 #include "types.h"
 #include "core.h"
 #include "mmc.h"
@@ -973,26 +975,30 @@ static void derive_rpmb_key(uint8_t *in) {
     hex_dump(in, 16);
     printf("\n");
 
-    uint8_t expand[32] = { 0 };
-    for (int i = 0; i < 32; ++i) {
-        expand[i] = in[i % 16];
+    uint8_t expand[64] = {0};
+    for (int i = 0; i < 64; ++i)
+    {
+        expand[i] = (in)[i % 16];
     }
 
     printf("expand:\n");
-    hex_dump(expand, 32);
+    hex_dump(expand, 64);
     printf("\n");
 
-    sej_encrypt(expand, 32, expand);
+    uint8_t result[32] = {0};
+    mtk_crypto_hmac_sha256_by_devkey(expand, 64, result);
+
     printf("encrypted:\n");
-    hex_dump(expand, 32);
+    hex_dump(result, 32);
     printf("\n");
 
-    byteswap(expand, 32);
+    hmac_sha256(rpmb_key, result, 0x20, "RPMB", 5);
+
+    byteswap(rpmb_key, 32);
+
     printf("final:\n");
-    hex_dump(expand, 32);
+    hex_dump(rpmb_key, 32);
     printf("\n");
-
-    memcpy(rpmb_key, expand, 32);
 }
 
 int mmc_init(struct msdc_host *host) {
