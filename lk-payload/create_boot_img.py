@@ -67,8 +67,6 @@ def main():
 
     hdr += shellcode
 
-    payload_block_end = len(hdr)
-
     hdr += b"\x00" * (lk_offset + page_size - len(hdr) - 0x200)
 
     hdr += orig[:patch_offset + 0x200]
