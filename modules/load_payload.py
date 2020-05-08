@@ -136,7 +136,7 @@ def load_payload(dev, path):
         words.append(word)
 
     log("Send payload")
-    load_addr = 0x201000
+    load_addr = 0xC1000
     dev.write32(load_addr, words)
 
     log("Let's rock")
