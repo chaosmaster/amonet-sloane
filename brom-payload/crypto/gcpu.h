@@ -2,6 +2,7 @@
 #define GCPU_H
 
 #include <stdint.h>
+#include "../drivers/mt_sd.h"
 
 #define GCPU_BASE   0x10210000
 
@@ -12,7 +13,7 @@
 #endif
 
 #ifdef sdr_write32
-#define GCPU_WRITE_REG(reg, val)    sdr_write(reg, wal)
+#define GCPU_WRITE_REG(reg, val)    sdr_write32(reg, val)
 #else
 #define GCPU_WRITE_REG(reg, val)    ((*(volatile uint32_t *)(reg)) = (val))
 #endif
