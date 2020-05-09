@@ -1,6 +1,6 @@
 #!/bin/bash
 
-PAYLOAD_BLOCK=223223
+PAYLOAD_BLOCK=60407
 
 set -e
 
@@ -8,7 +8,7 @@ set -e
 
 adb wait-for-device
 
-check_device "suez" " - Amazon Fire HD 10 (2017) - "
+check_device "sloane" " - Amazon Fire TV (2nd generation) - "
 
 get_root
 
@@ -73,8 +73,8 @@ echo ""
 
 echo "Flashing TZ"
 adb push bin/tz.img /data/local/tmp/
-adb shell su -c \"dd if=/data/local/tmp/tz.img of=/dev/block/platform/soc/by-name/tee1 bs=512\" 
-adb shell su -c \"dd if=/data/local/tmp/tz.img of=/dev/block/platform/soc/by-name/tee2 bs=512\" 
+adb shell su -c \"dd if=/data/local/tmp/tz.img of=/dev/block/platform/soc/by-name/TEE1 bs=512\"
+adb shell su -c \"dd if=/data/local/tmp/tz.img of=/dev/block/platform/soc/by-name/TEE2 bs=512\"
 echo ""
 
 echo "Flashing Preloader"

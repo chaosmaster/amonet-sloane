@@ -2,7 +2,7 @@
 # amonet updater
 # Copyright (C) 2019 k4y0z @ xda-developers
 
-PAYLOAD_BLOCK=223223
+PAYLOAD_BLOCK=60407
 
 # detect whether in boot mode
 getprop | grep zygote | grep -q running && bootMode=true || bootMode=false
@@ -70,7 +70,7 @@ if [ "$?" -eq "0" ]; then
   done
 fi
 
-check_product "suez" " - Amazon Fire HD 10 (2017) - "
+check_product "sloane" " - Amazon Fire TV (2nd generation) - "
 
 TMPDIR=/dev/tmp
 INSTALLER=$TMPDIR/install

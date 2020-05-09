@@ -39,7 +39,7 @@ def main():
     # 1.1) Parse gpt
     gpt, gpt_header, part_list = parse_gpt(dev)
     #log("gpt_parsed = {}".format(gpt))
-    if "lk" not in gpt or "tee1" not in gpt or "boot" not in gpt or "recovery" not in gpt:
+    if "lk" not in gpt or "TEE1" not in gpt or "boot" not in gpt or "recovery" not in gpt:
         raise RuntimeError("bad gpt")
 
     if "boot_x" not in gpt or "recovery_x" not in gpt:
@@ -98,7 +98,7 @@ def main():
         # 7) Downgrade tz
         log("Flash tz")
         switch_user(dev)
-        flash_binary(dev, "../bin/tz.img", gpt["tee1"][0], gpt["tee1"][1] * 0x200)
+        flash_binary(dev, "../bin/tz.img", gpt["TEE1"][0], gpt["TEE1"][1] * 0x200)
 
         # 8) Downgrade lk
         log("Flash lk")
@@ -109,11 +109,11 @@ def main():
     log("Inject payload")
     switch_user(dev)
     flash_binary(dev, "../bin/boot.hdr", gpt["boot"][0], gpt["boot"][1] * 0x200)
-    flash_binary(dev, "../bin/boot.payload", gpt["boot"][0] + 223223, (gpt["boot"][1] * 0x200) - (223223 * 0x200))
+    flash_binary(dev, "../bin/boot.payload", gpt["boot"][0] + 60407, (gpt["boot"][1] * 0x200) - (60407 * 0x200))
     
     switch_user(dev)
     flash_binary(dev, "../bin/boot.hdr", gpt["recovery"][0], gpt["recovery"][1] * 0x200)
-    flash_binary(dev, "../bin/boot.payload", gpt["recovery"][0] + 223223, (gpt["recovery"][1] * 0x200) - (223223 * 0x200))
+    flash_binary(dev, "../bin/boot.payload", gpt["recovery"][0] + 60407, (gpt["recovery"][1] * 0x200) - (60407 * 0x200))
 
     log("Force fastboot")
     force_fastboot(dev, gpt)

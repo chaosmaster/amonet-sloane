@@ -10,7 +10,7 @@ max_tee=263
 max_lk=2
 max_pl=5
 
-check_device "suez" " - Amazon Fire HD 10 (2017) - "
+check_device "sloane" " - Amazon Fire TV (2nd generation) - "
 
 get_root
 
