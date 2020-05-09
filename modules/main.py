@@ -8,82 +8,8 @@ from common import Device
 from handshake import handshake
 from load_payload import load_payload
 from logger import log
+from functions import *
 from gpt import parse_gpt_compat, generate_gpt, modify_step1, modify_step2, parse_gpt as gpt_parse_gpt
-
-def check_modemmanager():
-    pids = [pid for pid in os.listdir('/proc') if pid.isdigit()]
-
-    for pid in pids:
-        try:
-            args = open(os.path.join('/proc', pid, 'cmdline'), 'rb').read().decode("utf-8").split('\0')
-            if len(args) > 0 and "modemmanager" in args[0].lower():
-                print("You need to temporarily disable/uninstall ModemManager before this script can proceed")
-                sys.exit(1)
-        except IOError:
-            continue
-
-def switch_boot0(dev):
-    dev.emmc_switch(1)
-    block = dev.emmc_read(0)
-    if block[0:9] != b"EMMC_BOOT" and block != b"\x00" * 0x200:
-        dev.reboot()
-        raise RuntimeError("what's wrong with your BOOT0?")
-
-def flash_data(dev, data, start_block, max_size=0):
-    while len(data) % 0x200 != 0:
-        data += b"\x00"
-
-    if max_size and len(data) > max_size:
-        raise RuntimeError("data too big to flash")
-
-    blocks = len(data) // 0x200
-    for x in range(blocks):
-        print("[{} / {}]".format(x + 1, blocks), end='\r')
-        dev.emmc_write(start_block + x, data[x * 0x200:(x + 1) * 0x200])
-    print("")
-
-def flash_binary(dev, path, start_block, max_size=0):
-    with open(path, "rb") as fin:
-        data = fin.read()
-    while len(data) % 0x200 != 0:
-        data += b"\x00"
-
-    flash_data(dev, data, start_block, max_size=0)
-
-def dump_binary(dev, path, start_block, max_size=0):
-    with open(path, "w+b") as fout:
-        blocks = max_size // 0x200
-        for x in range(blocks):
-            print("[{} / {}]".format(x + 1, blocks), end='\r')
-            fout.write(dev.emmc_read(start_block + x))
-    print("")
-
-def force_fastboot(dev, gpt):
-    switch_user(dev)
-    block = list(dev.emmc_read(gpt["MISC"][0]))
-    block[0:16] = "FASTBOOT_PLEASE\x00".encode("utf-8")
-    dev.emmc_write(gpt["MISC"][0], bytes(block))
-    block = dev.emmc_read(gpt["MISC"][0])
-
-def switch_user(dev):
-    dev.emmc_switch(0)
-    block = dev.emmc_read(0)
-    if block[510:512] != b"\x55\xAA":
-        dev.reboot()
-        raise RuntimeError("what's wrong with your GPT?")
-
-def parse_gpt(dev):
-    data = dev.emmc_read(0x400 // 0x200) + dev.emmc_read(0x600 // 0x200) + dev.emmc_read(0x800 // 0x200) + dev.emmc_read(0xA00 // 0x200) + dev.emmc_read(0xC00 // 0x200)
-    num = len(data) // 0x80
-    return parse_gpt_compat(dev.emmc_read(0x200 // 0x200) + data)
-#    parts = dict()
-#    for x in range(num):
-#        part = data[x * 0x80:(x + 1) * 0x80]
-#        part_name = part[0x38:].decode("utf-16le").rstrip("\x00")
-#        part_start = struct.unpack("<Q", part[0x20:0x28])[0]
-#        part_end = struct.unpack("<Q", part[0x28:0x30])[0]
-#        parts[part_name] = (part_start, part_end - part_start + 1)
-#    return parts
 
 def main():
 
