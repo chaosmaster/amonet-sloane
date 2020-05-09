@@ -24,7 +24,7 @@ void gcpu_uninit(void);
 int gcpu_cmd(uint32_t cmd);
 
 void gcpu_memptr_set(uint32_t offset, uint8_t *data_in);
-void gcpu_memptr_get(uint32_t offset, uint32_t len, uint8_t *data_out);
+void gcpu_memptr_get(uint32_t offset, int len, uint8_t *data_out);
 
 int gcpu_load_hw_key(uint32_t offset);
 int gcpu_aes_decrypt(uint32_t key_offset, uint32_t data_offset, uint32_t out_offset);

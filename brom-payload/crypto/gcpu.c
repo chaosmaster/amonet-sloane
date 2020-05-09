@@ -2,16 +2,16 @@
 #include "../printf.h"
 
 void gcpu_init(void) {
-    GCPU_WRITE_REG(GCPU_BASE, GCPU_READ_REG(GCPU_BASE) & 0xfffffff0 | 0xf);
+    GCPU_WRITE_REG(GCPU_BASE, (GCPU_READ_REG(GCPU_BASE) & 0xfffffff0) | 0xf);
     GCPU_WRITE_REG(GCPU_BASE + 0x4, GCPU_READ_REG(GCPU_BASE + 0x4) & 0xFFFFDFF);
 }
 
 void gcpu_uninit(void) {
-    GCPU_WRITE_REG(GCPU_BASE, GCPU_READ_REG(GCPU_BASE) & 0xfffffff0 | 0xf);
+    GCPU_WRITE_REG(GCPU_BASE, (GCPU_READ_REG(GCPU_BASE) & 0xfffffff0) | 0xf);
 }
 
 int gcpu_cmd(uint32_t cmd) {
-    uint32_t ret;
+    uint32_t ret = 0;
 
     GCPU_WRITE_REG(GCPU_BASE + 0x0804, 3);
     GCPU_WRITE_REG(GCPU_BASE + 0x0808, 3);
@@ -28,7 +28,7 @@ int gcpu_cmd(uint32_t cmd) {
         }
     }
     else {
-        while(GCPU_READ_REG(GCPU_BASE + 0x0418) & 1 == 0) {}
+        while((GCPU_READ_REG(GCPU_BASE + 0x0418) & 1) == 0) {}
         ret = 0;
         GCPU_WRITE_REG(GCPU_BASE + 0x0804, 3);
     }
@@ -38,14 +38,13 @@ int gcpu_cmd(uint32_t cmd) {
 
 void gcpu_memptr_set(uint32_t offset, uint8_t *data_in) {
     int i;
-    uint32_t tmp_val;
 
     for(i = 0; i < 16; i += 4) {
         GCPU_WRITE_REG(GCPU_BASE + 0xC00 + i + (offset * 4), ((uint32_t *)(data_in + i))[0]);
     }
 }
 
-void gcpu_memptr_get(uint32_t offset, uint32_t len, uint8_t *data_out) {
+void gcpu_memptr_get(uint32_t offset, int len, uint8_t *data_out) {
     int i;
 
     for(i = 0; i < len; i += 4) {

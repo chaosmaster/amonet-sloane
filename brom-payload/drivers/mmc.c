@@ -9,6 +9,8 @@
 #include "mt_sd.h"
 #include "../crypto/hmac-sha256.h"
 
+#define RPMB_STRING "RPMB"
+
 #define be32_to_cpup(addr) __builtin_bswap32(*(uint32_t*)addr)
 #define be16_to_cpup(addr) __builtin_bswap16(*(uint16_t*)addr)
 #define cpu_to_be16p be16_to_cpup
@@ -887,7 +889,7 @@ static void derive_rpmb_key(uint8_t *in) {
     hex_dump(result, 32);
     printf("\n");
 
-    hmac_sha256(rpmb_key, result, 0x20, "RPMB", 5);
+    hmac_sha256(rpmb_key, result, 0x20, (uint8_t *) RPMB_STRING, 5);
 
     byteswap(rpmb_key, 32);
 
