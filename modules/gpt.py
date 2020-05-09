@@ -179,22 +179,24 @@ def modify_step1(part_list):
     partition = part_list_n[len(part_list_n) - 1]
 
     assert partition['name'].decode("utf-16le").rstrip("\x00") == "userdata", "the last partition is not userdata, refusing modification"
+    assert not get_part_by_name(part_list_n, "boot_x") and not get_part_by_name(part_list_n, "recovery_x") and not get_part_by_name(part_list_n, "boot_tmp") and not get_part_by_name(part_list_n, "recovery_tmp"), "partition table is already modified, refusing modification"
 
-    partition['end'] = ((partition['end'] // ALIGN_BLOCKS) * ALIGN_BLOCKS) - 0x1E000 - 1
+    partition_orig = partition.copy()
     
-    partition_n = partition.copy()
-    partition_n['guid'] = uuid.uuid4().bytes_le
-    partition_n['start'] = partition['end'] + 1
-    partition_n['end'] = partition_n['start'] + 0xF000 - 1
-    partition_n['name'] = "boot_tmp".encode("utf-16le") + b"\x00\x00"
-    part_list_n.append(partition_n)
+    partition['guid'] = uuid.uuid4().bytes_le
+    partition['end'] = partition['start'] + 0xF000 - 1
+    partition['name'] = "boot_tmp".encode("utf-16le") + b"\x00\x00"
 
-    partition_n = partition_n.copy()
+    partition_n = partition.copy()
     partition_n['guid'] = uuid.uuid4().bytes_le
     partition_n['start'] = partition_n['end'] + 1
     partition_n['end'] = partition_n['start'] + 0xF000 - 1
     partition_n['name'] = "recovery_tmp".encode("utf-16le") + b"\x00\x00"
     part_list_n.append(partition_n)
+
+    partition_orig['start'] = partition_n['end'] + 1
+    part_list_n.append(partition_orig)
+
 
     return part_list_n
 
