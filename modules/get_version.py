@@ -6,23 +6,29 @@ def get_lk_version(filename):
     with open(filename, "rb") as lk:
         lk.seek(4)
         size = struct.unpack("<I", lk.read(4))
-        lk.seek(size[0] + 0x200 - 0x102)
-        return struct.unpack(">H", lk.read(2))[0]
+        if lk.read(2) == b"LK":
+            lk.seek(size[0] + 0x200 - 0x102)
+            return struct.unpack(">H", lk.read(2))[0]
+        else:
+            return 0xFFFF
 
 def get_tz_version(filename):
     with open(filename, "rb") as tz:
-        tz.seek(0x20f)
-        return struct.unpack(">H", tz.read(2))[0]
+        tz.seek(8)
+        if tz.read(3) == b"ATF":
+            tz.seek(0x20f)
+            return struct.unpack(">H", tz.read(2))[0]
+        else:
+            return 0xFFFF
 
 def get_pl_version(filename):
     with open(filename, "rb") as pl:
         data = pl.read()
         offset = data.find(b"\x34\xb6\x12\x00\xbc\xbf\x12\x00")
-        if offset:
-            version = int.from_bytes(data[offset + 8: offset + 9], "little")
+        if offset > 0:
+            return int.from_bytes(data[offset + 8: offset + 9], "little")
         else:
-            version = 0xFF
-        return version
+            return 0xFF
 
 def main():
     if len(sys.argv) != 3:
