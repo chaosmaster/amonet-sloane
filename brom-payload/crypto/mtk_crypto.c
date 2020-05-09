@@ -55,7 +55,7 @@ void mtk_crypto_hmac_sha256_by_devkey(uint8_t* data, uint32_t data_len, uint8_t*
     memcpy(seed, init_array, 16);
     
     dev_val = get_devinfo_with_index(12);
-    xor_data(seed, (uint8_t *)dev_val, seed, 4);
+    xor_data(seed, (uint8_t *)&dev_val, seed, 4);
     dev_val = get_devinfo_with_index(13);
     xor_data(seed + 4, (uint8_t *)&dev_val, seed + 4, 4);
 
