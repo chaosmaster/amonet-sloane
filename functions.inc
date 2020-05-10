@@ -26,6 +26,19 @@ function check_su() {
   fi
 }
 
+function pull_images() {
+   [ ! -d dumps ] && mkdir dumps
+   adb shell su -c \"dd if=/dev/block/platform/mtk-msdc.0/by-name/TEE1 of=/data/local/tmp/tz_stock.bin bs=512\"
+   adb shell su -c \"dd if=/dev/block/platform/mtk-msdc.0/by-name/lk of=/data/local/tmp/lk_stock.bin bs=512\"
+   adb shell su -c \"dd if=/dev/block/mmcblk0boot0 of=/data/local/tmp/pl_stock.bin bs=512\"
+   adb shell su -c \"chmod 644 /data/local/tmp/lk_stock.bin\"
+   adb shell su -c \"chmod 644 /data/local/tmp/tz_stock.bin\"
+   adb shell su -c \"chmod 644 /data/local/tmp/pl_stock.bin\" 
+   adb pull /data/local/tmp/lk_stock.bin dumps/
+   adb pull /data/local/tmp/tz_stock.bin dumps/
+   adb pull /data/local/tmp/pl_stock.bin dumps/
+}
+
 function push_root() {
   echo "Pushing root files"
   adb push bin/mtk-su /data/local/tmp/
@@ -36,7 +49,7 @@ function push_root() {
 }
 
 function check_device() {
-  product=$(adb shell getprop ro.product.name | dos2unix)
+  product=$(adb shell getprop ro.build.product | dos2unix)
 
   if [ "$product" != "${1}" ] ; then
     echo "This is only for the \"${1}\"${2}, your device is a \"${product}\""

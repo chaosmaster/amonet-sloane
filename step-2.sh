@@ -14,9 +14,9 @@ get_root
 
 set +e
 echo "Looking for partition-suffix"
-adb shell su -c \"ls -l /dev/block/platform/soc/by-name\" | grep recovery_tmp
+adb shell su -c \"ls -l /dev/block/platform/mtk-msdc.0/by-name\" | grep recovery_tmp
 if [ $? -ne 0 ] ; then
-  adb shell su -c \"ls -l /dev/block/platform/soc/by-name\" | grep recovery_x
+  adb shell su -c \"ls -l /dev/block/platform/mtk-msdc.0/by-name\" | grep recovery_x
   if [ $? -ne 0 ] ; then
     echo "Didn't find new partitions, did you do step-1.sh first?"
     exit 1
@@ -60,29 +60,27 @@ fi
 echo "Flashing exploit"
 adb push bin/boot.hdr /data/local/tmp/
 adb push bin/boot.payload /data/local/tmp/
-adb shell su -c \"dd if=/data/local/tmp/boot.hdr of=/dev/block/platform/soc/by-name/boot${suffix} bs=512\" 
-adb shell su -c \"dd if=/data/local/tmp/boot.payload of=/dev/block/platform/soc/by-name/boot${suffix} bs=512 seek=${PAYLOAD_BLOCK}\" 
-adb shell su -c \"dd if=/data/local/tmp/boot.hdr of=/dev/block/platform/soc/by-name/recovery${suffix} bs=512\" 
-adb shell su -c \"dd if=/data/local/tmp/boot.payload of=/dev/block/platform/soc/by-name/recovery${suffix} bs=512 seek=${PAYLOAD_BLOCK}\" 
+adb shell su -c \"dd if=/data/local/tmp/boot.hdr of=/dev/block/platform/mtk-msdc.0/by-name/boot${suffix} bs=512\" 
+adb shell su -c \"dd if=/data/local/tmp/boot.payload of=/dev/block/platform/mtk-msdc.0/by-name/boot${suffix} bs=512 seek=${PAYLOAD_BLOCK}\" 
+adb shell su -c \"dd if=/data/local/tmp/boot.hdr of=/dev/block/platform/mtk-msdc.0/by-name/recovery${suffix} bs=512\" 
+adb shell su -c \"dd if=/data/local/tmp/boot.payload of=/dev/block/platform/mtk-msdc.0/by-name/recovery${suffix} bs=512 seek=${PAYLOAD_BLOCK}\" 
 echo ""
 
 echo "Flashing LK"
 adb push bin/lk.bin /data/local/tmp/
-adb shell su -c \"dd if=/data/local/tmp/lk.bin of=/dev/block/platform/soc/by-name/lk bs=512\" 
+adb shell su -c \"dd if=/data/local/tmp/lk.bin of=/dev/block/platform/mtk-msdc.0/by-name/lk bs=512\" 
 echo ""
 
 echo "Flashing TZ"
 adb push bin/tz.img /data/local/tmp/
-adb shell su -c \"dd if=/data/local/tmp/tz.img of=/dev/block/platform/soc/by-name/TEE1 bs=512\"
-adb shell su -c \"dd if=/data/local/tmp/tz.img of=/dev/block/platform/soc/by-name/TEE2 bs=512\"
+adb shell su -c \"dd if=/data/local/tmp/tz.img of=/dev/block/platform/mtk-msdc.0/by-name/TEE1 bs=512\"
+adb shell su -c \"dd if=/data/local/tmp/tz.img of=/dev/block/platform/mtk-msdc.0/by-name/TEE2 bs=512\"
 echo ""
 
 echo "Flashing Preloader"
 adb shell su -c \"echo 0 \> /sys/block/mmcblk0boot0/force_ro\"
-adb push bin/boot0short.img /data/local/tmp/
-adb shell su -c \"dd if=/data/local/tmp/boot0short.img of=/dev/block/mmcblk0boot0 bs=512\" 
 adb push bin/preloader.bin /data/local/tmp/
-adb shell su -c \"dd if=/data/local/tmp/preloader.bin of=/dev/block/mmcblk0boot0 bs=512 seek=520\" 
+adb shell su -c \"dd if=/data/local/tmp/preloader.bin of=/dev/block/mmcblk0boot0 bs=512\" 
 echo ""
 
 echo "Flashing final GPT"

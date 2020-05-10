@@ -14,9 +14,11 @@ check_device "sloane" " - Amazon Fire TV (2nd generation) - "
 
 get_root
 
-tee_version=$((`adb shell getprop ro.boot.tee_version | dos2unix`))
-lk_version=$((`adb shell getprop ro.boot.lk_version | dos2unix`))
-pl_version=$((`adb shell getprop ro.boot.pl_version | dos2unix`))
+pull_images
+
+tee_version=$((`python3 modules/get_version.py tz dumps/tz_stock.bin | dos2unix`))
+lk_version=$((`python3 modules/get_version.py lk dumps/lk_stock.bin | dos2unix`))
+pl_version=$((`python3 modules/get_version.py pl dumps/pl_stock.bin | dos2unix`))
 
 echo "PL version: ${pl_version} (${max_pl})"
 echo "LK version: ${lk_version} (${max_lk})"
@@ -35,13 +37,13 @@ if [ "$1" = "brick" ] || [ $tee_version -gt $max_tee ] || [ $lk_version -gt $max
 
     echo "Flashing LK"
     adb push bin/lk.bin /data/local/tmp/
-    adb shell su -c \"dd if=/data/local/tmp/lk.bin of=/dev/block/platform/soc/by-name/lk bs=512\" 
+    adb shell su -c \"dd if=/data/local/tmp/lk.bin of=/dev/block/platform/mtk-msdc.0/by-name/lk bs=512\" 
     echo ""
 
     echo "Flashing TZ"
     adb push bin/tz.img /data/local/tmp/
-    adb shell su -c \"dd if=/data/local/tmp/tz.img of=/dev/block/platform/soc/by-name/tee1 bs=512\" 
-    adb shell su -c \"dd if=/data/local/tmp/tz.img of=/dev/block/platform/soc/by-name/tee2 bs=512\" 
+    adb shell su -c \"dd if=/data/local/tmp/tz.img of=/dev/block/platform/mtk-msdc.0/by-name/TEE1 bs=512\" 
+    adb shell su -c \"dd if=/data/local/tmp/tz.img of=/dev/block/platform/mtk-msdc.0/by-name/TEE2 bs=512\" 
     echo ""
 
     echo "Rebooting..., continue with bootrom-step-minimal.sh"
