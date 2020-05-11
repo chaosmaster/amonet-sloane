@@ -81,7 +81,7 @@ get_pl_version() {
 	PL=$1
 	hexdump -ve '1/1 ":%.2x"' $PL| grep "34:b6:12:00:bc:bf:12:00" >/dev/null 2>&1
 	if [ $? -eq 0 ]; then
-		version=$(hexdump -ve '1/1 ":%.2x"' $PL| sed "s/34:b6:12:00:bc:bf:12:00:\([0-9a-f]\{2\}\).*/\1/g" | awk -F ":" '{print $NF}')
+		version=$((0x$(hexdump -ve '1/1 ":%.2x"' $PL| sed "s/34:b6:12:00:bc:bf:12:00:\([0-9a-f]\{2\}\).*/\1/g" | awk -F ":" '{print $NF}')))
 	else
 		version=$((0xFFFF))
 	fi
