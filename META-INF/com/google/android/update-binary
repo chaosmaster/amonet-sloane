@@ -172,13 +172,16 @@ else
 	
 	sleep 10
 
-	ui_print "- unmounting /data"
-	umount /data
-	if [ $? -ne 0 ]; then
-		umount -f /data
-		if [ $? -ne 0 ] ;then
-			ui_print "-- Failed unmounting data, abort!"
-			exit 1
+	grep /data /proc/mounts
+	if [ $? -eq 0 ]; then
+		ui_print "- unmounting /data"
+		umount /data
+		if [ $? -ne 0 ]; then
+			umount -f /data
+			if [ $? -ne 0 ] ;then
+				ui_print "-- Failed unmounting data, abort!"
+				exit 1
+			fi
 		fi
 	fi
 
