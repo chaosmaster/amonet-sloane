@@ -27,6 +27,12 @@ def main():
     # 0.2) Load brom payload
     load_payload(dev, "../brom-payload/build/payload.bin")
 
+
+    if len(sys.argv) == 2 and sys.argv[1] == "fixgpt":
+        dev.emmc_switch(0)
+        log("Flashing GPT")
+        flash_binary(dev, "../bin/gpt-sloane.bin", 0, 34 * 0x200)
+
     if len(sys.argv) == 2 and sys.argv[1] == "minimal":
         log("Running in minimal mode, assuming LK and TZ to have already been flashed.")
         log("If this is correct (i.e. you used \"brick\" option in step 1) press enter, otherwise terminate with Ctrl+C")

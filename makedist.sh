@@ -27,6 +27,11 @@ cp META-INF/com/google/android/{update-binary,updater-script} dist/unlock/META-I
 #cp bin/recovery.img dist/stock/amonet/bin/
 #cp return-to-stock.sh dist/stock/amonet/
 
+mkdir -p dist/gptfix/amonet/bin
+cp gpt-fix.sh dist/gptfix/amonet/
+cp gpt/gpt-sloane.bin dist/gptfix/amonet/bin/
+
 mkdir -p dist/full
 cp -r dist/unlock/* dist/full/
 #cp -r dist/stock/* dist/full/
+cp -r dist/gptfix/* dist/full/
