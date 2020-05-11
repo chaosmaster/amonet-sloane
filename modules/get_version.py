@@ -28,7 +28,7 @@ def get_pl_version(filename):
         if offset > 0:
             return int.from_bytes(data[offset + 8: offset + 9], "little")
         else:
-            return 0xFF
+            return 0xFFFF
 
 def main():
     if len(sys.argv) != 3:
