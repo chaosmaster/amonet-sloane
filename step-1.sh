@@ -6,6 +6,8 @@ set -e
 
 adb wait-for-device
 
+PART_PREFIX=/dev/block/platform/mtk-msdc.0/by-name
+
 max_tee=261
 max_lk=2
 max_pl=4
@@ -37,13 +39,13 @@ if [ "$1" = "brick" ] || [ $tee_version -gt $max_tee ] || [ $lk_version -gt $max
 
     echo "Flashing LK"
     adb push bin/lk.bin /data/local/tmp/
-    adb shell su -c \"dd if=/data/local/tmp/lk.bin of=/dev/block/platform/mtk-msdc.0/by-name/lk bs=512\" 
+    adb shell su -c \"dd if=/data/local/tmp/lk.bin of=${PART_PREFIX}/lk bs=512\" 
     echo ""
 
     echo "Flashing TZ"
     adb push bin/tz.img /data/local/tmp/
-    adb shell su -c \"dd if=/data/local/tmp/tz.img of=/dev/block/platform/mtk-msdc.0/by-name/TEE1 bs=512\" 
-    adb shell su -c \"dd if=/data/local/tmp/tz.img of=/dev/block/platform/mtk-msdc.0/by-name/TEE2 bs=512\" 
+    adb shell su -c \"dd if=/data/local/tmp/tz.img of=${PART_PREFIX}/TEE1 bs=512\" 
+    adb shell su -c \"dd if=/data/local/tmp/tz.img of=${PART_PREFIX}/TEE2 bs=512\" 
     echo ""
 
     echo "Rebooting..., continue with bootrom-step-minimal.sh"
