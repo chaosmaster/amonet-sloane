@@ -152,7 +152,7 @@ int main() {
         char* disable_uart = (char*)0x41e58758;
         strcpy(disable_uart, " printk.disable_uart=0");
         char* disable_uart2 = (char*)0x41e58e84;
-        strcpy(disable_uart, "printk.disable_uart=0");
+        strcpy(disable_uart2, "printk.disable_uart=0");
       }
 
     }
