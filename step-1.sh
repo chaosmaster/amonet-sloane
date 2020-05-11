@@ -18,9 +18,16 @@ get_root
 
 pull_images
 
-tee_version=$((`python3 modules/get_version.py tz dumps/tz_stock.bin | dos2unix`))
-lk_version=$((`python3 modules/get_version.py lk dumps/lk_stock.bin | dos2unix`))
-pl_version=$((`python3 modules/get_version.py pl dumps/pl_stock.bin | dos2unix`))
+tee1_version=$((`python3 modules/get_version.py tz dumps/tz1_stock.bin`))
+tee2_version=$((`python3 modules/get_version.py tz dumps/tz2_stock.bin`))
+lk_version=$((`python3 modules/get_version.py lk dumps/lk_stock.bin`))
+pl_version=$((`python3 modules/get_version.py pl dumps/pl_stock.bin`))
+
+if [ $tee1_version -ge $tee2_version] ; then
+  tee_version=$tee1_version
+else
+  tee_version=$tee2_version
+fi
 
 echo "PL version: ${pl_version} (${max_pl})"
 echo "LK version: ${lk_version} (${max_lk})"

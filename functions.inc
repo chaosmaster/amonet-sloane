@@ -28,14 +28,17 @@ function check_su() {
 
 function pull_images() {
    [ ! -d dumps ] && mkdir dumps
-   adb shell su -c \"dd if=/dev/block/platform/mtk-msdc.0/by-name/TEE1 of=/data/local/tmp/tz_stock.bin bs=512\"
+   adb shell su -c \"dd if=/dev/block/platform/mtk-msdc.0/by-name/TEE1 of=/data/local/tmp/tz1_stock.bin bs=512\"
+   adb shell su -c \"dd if=/dev/block/platform/mtk-msdc.0/by-name/TEE2 of=/data/local/tmp/tz2_stock.bin bs=512\"
    adb shell su -c \"dd if=/dev/block/platform/mtk-msdc.0/by-name/lk of=/data/local/tmp/lk_stock.bin bs=512\"
    adb shell su -c \"dd if=/dev/block/mmcblk0boot0 of=/data/local/tmp/pl_stock.bin bs=512\"
    adb shell su -c \"chmod 644 /data/local/tmp/lk_stock.bin\"
-   adb shell su -c \"chmod 644 /data/local/tmp/tz_stock.bin\"
+   adb shell su -c \"chmod 644 /data/local/tmp/tz1_stock.bin\"
+   adb shell su -c \"chmod 644 /data/local/tmp/tz2_stock.bin\"
    adb shell su -c \"chmod 644 /data/local/tmp/pl_stock.bin\" 
    adb pull /data/local/tmp/lk_stock.bin dumps/
-   adb pull /data/local/tmp/tz_stock.bin dumps/
+   adb pull /data/local/tmp/tz1_stock.bin dumps/
+   adb pull /data/local/tmp/tz2_stock.bin dumps/
    adb pull /data/local/tmp/pl_stock.bin dumps/
 }
 
