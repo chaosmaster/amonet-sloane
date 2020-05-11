@@ -6,9 +6,9 @@ set -e
 
 adb wait-for-device
 
-max_tee=263
+max_tee=261
 max_lk=2
-max_pl=5
+max_pl=4
 
 check_device "sloane" " - Amazon Fire TV (2nd generation) - "
 
