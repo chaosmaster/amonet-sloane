@@ -277,7 +277,8 @@ else
 	dd if=${INSTALLER}/amonet/bin/gpt-sloane-amonet.bin of=/dev/block/mmcblk0 bs=512 count=34
 	ui_print ""
 
-	ui_print "Rebooting to TWRP"
+	ui_print "Rebooting to TWRP in 5 Seconds..."
+	sleep 5
 	reboot recovery
 	ui_print ""
 	exit 0
