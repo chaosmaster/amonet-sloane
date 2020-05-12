@@ -201,7 +201,7 @@ else
 	tz1_version=$(get_tz_version "${PART_PREFIX}/TEE1${REAL_SUFFIX}")
 	tz2_version=$(get_tz_version "${PART_PREFIX}/TEE2${REAL_SUFFIX}")
 	pl_version=$(get_pl_version "/dev/block/mmcblk0boot0")
-	if [ $tz1_version -ge $tz2_version] ; then
+	if [ $tz1_version -ge $tz2_version ] || [ $tz2_version -eq $((0xFFFF)) ] ; then
 		tz_version=$tz1_version
 	else
 		tz_version=$tz2_version

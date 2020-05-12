@@ -23,7 +23,7 @@ tee2_version=$((`python3 modules/get_version.py tz dumps/tz2_stock.bin`))
 lk_version=$((`python3 modules/get_version.py lk dumps/lk_stock.bin`))
 pl_version=$((`python3 modules/get_version.py pl dumps/pl_stock.bin`))
 
-if [ $tee1_version -ge $tee2_version] ; then
+if [ $tee1_version -ge $tee2_version ] || [ $tee2_version -eq $((0xFFFF)) ] ; then
   tee_version=$tee1_version
 else
   tee_version=$tee2_version
