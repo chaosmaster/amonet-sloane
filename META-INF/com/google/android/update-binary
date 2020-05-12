@@ -134,26 +134,26 @@ ui_print " "
 ui_print "amonet installer for sloane"
 
 # Check if gpt is already modified
-dd if=/dev/block/mmcblk0 bs=512 count=34 2> /dev/null| grep boot_x > /dev/null
+dd if=/dev/block/mmcblk0 bs=512 count=34 2> /dev/null | grep boot_x > /dev/null
 if [ $? -eq 0 ] ; then
 	UPDATE=1
 	ui_print "GPT is already modified, updating amonet..."
 else
-	dd if=/dev/block/mmcblk0 bs=512 count=34 2> /dev/null| grep boot_tmp > /dev/null
+	dd if=/dev/block/mmcblk0 bs=512 count=34 2> /dev/null | grep boot_tmp > /dev/null
 	if [ $? -eq 0 ] ; then
 		ui_print "Partially modified GPT detected, forcing reinstall..."
 	fi
 fi
 
-if [ -L $PART_PREFIX/lk_real ]; then
+if [ -L $PART_PREFIX/lk_real ] ; then
 	REAL_SUFFIX=_real
 fi
 
-if [ -L $PART_PREFIX/boot_amonet ]; then
+if [ -L $PART_PREFIX/boot_amonet ] ; then
 	AMONET_SUFFIX=_amonet
 fi
 
-if [ $UPDATE -eq 1 ]; then
+if [ $UPDATE -eq 1 ] ; then
 
 	ui_print "- updating TWRP"
 	dd if=${INSTALLER}/amonet/bin/twrp.img of=${PART_PREFIX}/recovery_x
@@ -186,12 +186,12 @@ else
 	sleep 10
 
 	grep /data /proc/mounts
-	if [ $? -eq 0 ]; then
+	if [ $? -eq 0 ] ; then
 		ui_print "- unmounting /data"
 		umount /data
-		if [ $? -ne 0 ]; then
+		if [ $? -ne 0 ] ; then
 			umount -f /data
-			if [ $? -ne 0 ] ;then
+			if [ $? -ne 0 ] ; then
 				ui_print "-- Failed unmounting data, abort!"
 				exit 1
 			fi
@@ -200,7 +200,7 @@ else
 
 	# Make sure it won't be mounted again
 	part=$(readlink -f $PART_PREFIX/userdata)
-	if [ -b "$part" ]; then
+	if [ -b "$part" ] ; then
 		rm -f "$part"
 	fi
 
@@ -251,7 +251,7 @@ else
 	dd if=${INSTALLER}/amonet/bin/tz.img of=${PART_PREFIX}/TEE2${REAL_SUFFIX} bs=512
 	ui_print ""
 
-	if [ $BRICK -eq 1 ]; then
+	if [ $BRICK -eq 1 ] ; then
 		ui_print "Rebooting..., continue with bootrom-step-minimal.sh"
 		reboot
 		exit 0
