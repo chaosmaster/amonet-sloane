@@ -153,7 +153,7 @@ if [ -L $PART_PREFIX/boot_amonet ] ; then
 	AMONET_SUFFIX=_amonet
 fi
 
-if [ $UPDATE -eq 1 ] ; then
+if [ $UPDATE ] ; then
 
 	ui_print "- updating TWRP"
 	dd if=${INSTALLER}/amonet/bin/twrp.img of=${PART_PREFIX}/recovery_x
@@ -251,7 +251,7 @@ else
 	dd if=${INSTALLER}/amonet/bin/tz.img of=${PART_PREFIX}/TEE2${REAL_SUFFIX} bs=512
 	ui_print ""
 
-	if [ $BRICK -eq 1 ] ; then
+	if [ $BRICK ] ; then
 		ui_print "Rebooting..., continue with bootrom-step-minimal.sh"
 		reboot
 		exit 0
