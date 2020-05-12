@@ -149,15 +149,19 @@ if [ -L $PART_PREFIX/lk_real ]; then
 	REAL_SUFFIX=_real
 fi
 
+if [ -L $PART_PREFIX/boot_amonet ]; then
+	AMONET_SUFFIX=_amonet
+fi
+
 if [ $UPDATE -eq 1 ]; then
 
 	ui_print "- updating TWRP"
 	dd if=${INSTALLER}/amonet/bin/twrp.img of=${PART_PREFIX}/recovery_x
 	ui_print "- updating payload"
-	dd if=${INSTALLER}/amonet/bin/boot.hdr of=${PART_PREFIX}/boot bs=512 
-	dd if=${INSTALLER}/amonet/bin/boot.payload of=${PART_PREFIX}/boot bs=512 seek=${PAYLOAD_BLOCK} 
-	dd if=${INSTALLER}/amonet/bin/boot.hdr of=${PART_PREFIX}/recovery bs=512 
-	dd if=${INSTALLER}/amonet/bin/boot.payload of=${PART_PREFIX}/recovery bs=512 seek=${PAYLOAD_BLOCK} 
+	dd if=${INSTALLER}/amonet/bin/boot.hdr of=${PART_PREFIX}/boot${AMONET_SUFFIX} bs=512 
+	dd if=${INSTALLER}/amonet/bin/boot.payload of=${PART_PREFIX}/boot${AMONET_SUFFIX} bs=512 seek=${PAYLOAD_BLOCK} 
+	dd if=${INSTALLER}/amonet/bin/boot.hdr of=${PART_PREFIX}/recovery${AMONET_SUFFIX} bs=512 
+	dd if=${INSTALLER}/amonet/bin/boot.payload of=${PART_PREFIX}/recovery${AMONET_SUFFIX} bs=512 seek=${PAYLOAD_BLOCK} 
 	ui_print "- Update complete"
 	ui_print " "
 
