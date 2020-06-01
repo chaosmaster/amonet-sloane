@@ -138,6 +138,56 @@ static int mmc_select_card(struct mmc_host *host, uint32_t rca)
     return 0;
 }
 
+int mmc_read_csd(struct msdc_host *host, uint32_t rca, u32 *csd) {
+
+    int err;
+    struct mmc_command cmd = { 0 };
+
+    cmd.opcode = MMC_SEND_CSD;
+    cmd.arg = rca << 16;
+    cmd.flags =  MMC_RSP_R2 | MMC_CMD_AC;
+
+    err = msdc_cmd(host, &cmd);
+    if (err)
+        return err;
+
+    memcpy(csd, cmd.resp, sizeof(u32) * 4);
+
+    return 0;
+}
+
+uint32_t csd_be[4] = { 0 };
+
+uint32_t * mmc_get_csd(){
+	return csd_be;
+}
+
+uint32_t cid_be[4] = { 0 };
+
+uint32_t * mmc_get_cid(){
+	return cid_be;
+}
+
+int mmc_read_ext_csd(struct msdc_host *host, u8 *ext_csd)
+{
+	int err;
+
+	struct mmc_command cmd = {0};
+
+	cmd.opcode = MMC_SEND_EXT_CSD;
+	cmd.arg = 0;
+
+	cmd.flags = MMC_RSP_SPI_R1 | MMC_RSP_R1 | MMC_CMD_ADTC;
+
+	msdc_set_blknum(host, 1);
+
+	err = msdc_cmd(host, &cmd);
+	if (err)
+		return err;
+
+	return msdc_pio_read(host, ext_csd);
+}
+
 int mmc_read(struct msdc_host *host, uint32_t blk, void *buf)
 {
     int err;
@@ -927,7 +977,6 @@ int mmc_init(struct msdc_host *host) {
     ret = mmc_all_send_cid(host, cid);
     printf("ALL_SEND_CID = 0x%08X cid = 0x%08X 0x%08X 0x%08X 0x%08X\n", ret, cid[0], cid[1], cid[2], cid[3]);
 
-    uint32_t cid_be[4] = { 0 };
     for (int i = 0; i < 4; ++i)
         cid_be[i] = __builtin_bswap32(cid[i]);
     derive_rpmb_key((void*)cid_be);
@@ -935,8 +984,21 @@ int mmc_init(struct msdc_host *host) {
     ret = mmc_set_relative_addr(host, 1);
     printf("SET_RELATIVE_ADDR = 0x%08X\n", ret);
 
+    uint32_t csd[4] = { 0 };
+    ret = mmc_read_csd(host, 1, csd);
+    printf("SEND_CSD = 0x%08X csd = 0x%08X 0x%08X 0x%08X 0x%08X\n", ret, csd[0], csd[1], csd[2], csd[3]);
+
+    for (int i = 0; i < 4; ++i)
+        csd_be[i] = __builtin_bswap32(csd[i]);
+
     ret = mmc_select_card(host, 1);
     printf("SELECT_CARD = 0x%08X\n", ret);
+
+    uint8_t ext_csd[512];
+    ret = mmc_read_ext_csd(host, ext_csd);
+    printf("SEND_EXT_CSD = 0x%08X\n", ret);
+    hex_dump(ext_csd, 512);
+
 
     return 0;
 }

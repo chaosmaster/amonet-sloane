@@ -499,4 +499,8 @@ void msdc_set_blknum(struct msdc_host *host, u32 blknum);
 int msdc_pio_read(struct msdc_host *host, void *buf);
 int msdc_pio_write(struct msdc_host* host, void *buf);
 
+int mmc_read_csd(struct msdc_host *host, uint32_t rca, u32 *csd);
+uint32_t * mmc_get_csd();
+int mmc_read_ext_csd(struct msdc_host *host, u8 *ext_csd);
+uint32_t * mmc_get_cid();
 #endif /* LINUX_MMC_MMC_H */

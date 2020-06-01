@@ -161,6 +161,25 @@ int main() {
             reg[8/4] = 0x1971;
             break;
         }
+        case 0x6000 : {
+            printf("Reading emmc cid");
+            send_data(mmc_get_cid(), 0x10);
+            break;
+        }
+        case 0x6001 : {
+            printf("Reading emmc csd");
+	    //mmc_read_csd(&host, 0, (u32*)buf);
+            // CSD should be 128 bit
+            send_data(mmc_get_csd(), 0x10);
+            break;
+        }
+        case 0x6002 : {
+            printf("Reading emmc ext_csd");
+	    mmc_read_ext_csd(&host,(u8*)buf);
+            // CSD should be 128 bit
+            send_data(buf, 512);
+            break;
+        }
         default:
             printf("Invalid command\n");
             break;

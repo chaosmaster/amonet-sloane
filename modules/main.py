@@ -39,6 +39,20 @@ def main():
         input()
         minimal = True
 
+    #######################################################STUFF ADDED FOR CSD ##########################################################
+    print("CID:")
+    ret = dev.emmc_read_cid()
+    print(ret.hex())
+
+    print("CSD:")
+    ret = dev.emmc_read_csd()
+    print(ret.hex())
+
+    print("EXT_CSD:")
+    ret = dev.emmc_read_ext_csd()
+    print(ret.hex())
+    #####################################################################################################################################
+
     # 1) Sanity check GPT
     log("Check GPT")
     switch_user(dev)

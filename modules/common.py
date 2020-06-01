@@ -259,3 +259,36 @@ class Device:
         self.dev.write(p32_be(0x2001))
         # data
         self.dev.write(data)
+
+    def emmc_read_cid(self):
+        self.dev.write(p32_be(0xf00dd00d))
+        # cmd
+        self.dev.write(p32_be(0x6000))
+
+        data = self.dev.read(0x10)
+        if len(data) != 0x10:
+            raise RuntimeError("read fail")
+
+        return data
+
+    def emmc_read_csd(self):
+        self.dev.write(p32_be(0xf00dd00d))
+        # cmd
+        self.dev.write(p32_be(0x6001))
+
+        data = self.dev.read(0x10)
+        if len(data) != 0x10:
+            raise RuntimeError("read fail")
+
+        return data
+
+    def emmc_read_ext_csd(self):
+        self.dev.write(p32_be(0xf00dd00d))
+        # cmd
+        self.dev.write(p32_be(0x6002))
+
+        data = self.dev.read(512)
+        if len(data) != 512:
+            raise RuntimeError("read fail")
+
+        return data
