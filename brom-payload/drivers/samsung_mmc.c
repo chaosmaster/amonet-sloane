@@ -220,6 +220,37 @@ void msdc_config_pin(int mode)
 }
 
 
+#define PWR_GPIO            (0x10001E84)
+#define PWR_GPIO_EO         (0x10001E88)
+#define PWR_MASK_VOL_33     (0x1 << 10)
+#define PWR_MASK_VOL_18     (0x1 << 9)
+#define PWR_MASK_EN         (0x1 << 8)
+
+void msdc_set_card_pwr(int id, int on)
+{
+    /* set which bits are available */
+    sdr_write32(PWR_GPIO_EO, (PWR_MASK_VOL_18 | PWR_MASK_EN));
+
+    if (on) {
+        sdr_write32(PWR_GPIO, (PWR_MASK_VOL_18 | PWR_MASK_EN));
+    } else {
+        sdr_write32(PWR_GPIO, 0x0);
+    }
+    //mdelay(3);
+    sleepy();
+}
+
+void msdc_card_power(struct mmc_host *host, int on)
+{
+    //MSG(CFG, "[SD%d] Turn %s %s power \n", host->id, on ? "on" : "off", "card");
+
+    if (on) {
+        msdc_set_card_pwr(host->id, 1);
+    } else {
+        msdc_set_card_pwr(host->id, 0);
+    }
+}
+
 void msdc_host_power(int on)
 {
     //MSG(CFG, "[SD%d] Turn %s %s power \n", host->id, on ? "on" : "off", "host");
@@ -235,6 +266,19 @@ void msdc_host_power(int on)
     }
 }
 
+
+void msdc_power(struct mmc_host *host, u8 mode)
+{
+    if (mode == 1) {
+        msdc_host_power(1);
+        msdc_card_power(host, 1);
+    } else {
+        msdc_card_power(host, 0);
+        msdc_host_power(0);
+    }
+}
+
+
 int prepare_mmc(struct msdc_host *host, int bootrom)
 {
 	int ret = 0;
@@ -242,7 +286,7 @@ int prepare_mmc(struct msdc_host *host, int bootrom)
 
 	//emmc_poweroff();
 	//sleep(2000);
-	msdc_host_power(0);
+	msdc_power(host, 0);
 	sleepy();
 
 	//emmc_poweron();
@@ -250,7 +294,7 @@ int prepare_mmc(struct msdc_host *host, int bootrom)
 	//clk1(mmc_dev, 1);
 	//clk2(mmc_dev, 0);
 	//sleep(10);
-	msdc_host_power(1);
+	msdc_power(host, 1);
 	sleepy();
 	if (bootrom) {
 		cmd.opcode = 1;
