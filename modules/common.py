@@ -298,12 +298,16 @@ class Device:
         self.dev.write(p32_be(0xf00dd00d))
         # cmd
         self.dev.write(p32_be(0x7000))
+        
+        return self.dev.read(4)
 
     def emmc_exit_backdoor(self):
         # magic
         self.dev.write(p32_be(0xf00dd00d))
         # cmd
         self.dev.write(p32_be(0x7001))
+
+        return self.dev.read(4)
 
     def emmc_read_mem(self, idx):
         # magic

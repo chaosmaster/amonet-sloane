@@ -163,32 +163,34 @@ int main() {
             break;
         }
         case 0x6000 : {
-            printf("Reading emmc cid");
+            printf("Reading emmc cid\n");
             send_data(mmc_get_cid(), 0x10);
             break;
         }
         case 0x6001 : {
-            printf("Reading emmc csd");
+            printf("Reading emmc csd\n");
 	    //mmc_read_csd(&host, 0, (u32*)buf);
             // CSD should be 128 bit
             send_data(mmc_get_csd(), 0x10);
             break;
         }
         case 0x6002 : {
-            printf("Reading emmc ext_csd");
+            printf("Reading emmc ext_csd\n");
 	    mmc_read_ext_csd(&host,(u8*)buf);
             // CSD should be 128 bit
             send_data(buf, 512);
             break;
         }
         case 0x7000 : {
-            printf("Enter samsung backdoor");
-	    mmc_enter_read_ram(&host);
+            printf("Enter samsung backdoor\n");
+	    int res = mmc_enter_read_ram(&host);
+	    printf("%d\n", res);
+	    send_dword(res);
             break;
         }
         case 0x7001 : {
-            printf("Exit samsung backdoor");
-	    mmc_exit_cmd62(&host);
+            printf("Exit samsung backdoor\n");
+	    send_dword(mmc_exit_cmd62(&host));
             break;
 	}
         case 0x7002 : {
