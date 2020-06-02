@@ -16,6 +16,8 @@
 #define cpu_to_be16p be16_to_cpup
 #define cpu_to_be32p be32_to_cpup
 
+int prepare_mmc(struct msdc_host *host, int bootrom);
+
 unsigned int msdc_cmd(struct msdc_host *host, struct mmc_command *cmd);
 void sleepy(void);
 void hex_dump(const void* data, size_t size);
@@ -961,6 +963,9 @@ int mmc_init(struct msdc_host *host) {
 
     ret = mmc_go_idle(host);
     printf("GO_IDLE = 0x%08X\n", ret);
+
+    ret = prepare_mmc(host, 1);
+    printf("PREPARE MMC = 0x%08X\n", ret);
 
     uint32_t ocr = 0;
     ret = mmc_send_op_cond(host, 0, &ocr);

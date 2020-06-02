@@ -52,8 +52,7 @@ def main():
     ret = dev.emmc_read_ext_csd()
     print(ret.hex())
 
-    dump_emmc_mem(dev, "emmc-brom.bin", 0, 0x10000)
-    dump_emmc_mem(dev, "emmc-fw.bin", 0x40000, 0x40000)
+    dump_emmc_mem(dev, "emmc.mem", 0, 0x80000)
     #####################################################################################################################################
 
     # 1) Sanity check GPT

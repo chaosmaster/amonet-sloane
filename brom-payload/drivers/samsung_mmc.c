@@ -99,3 +99,32 @@ int _mmc_read_mem(struct msdc_host *host, int addr, int size, void *buf) {
 int mmc_read_mem(struct msdc_host *host, int addr, void *buf) {
 	return _mmc_read_mem(host, addr, BLOCK_SIZE, buf);
 }
+
+int prepare_mmc(struct msdc_host *host, int bootrom)
+{
+	int ret = 0;
+    	struct mmc_command cmd = { 0 };
+
+	//emmc_poweroff();
+	//sleep(2000);
+
+	//emmc_poweron();
+	//s5c_mshc_init(mmc_dev);
+	//clk1(mmc_dev, 1);
+	//clk2(mmc_dev, 0);
+	//sleep(10);
+	if (bootrom) {
+		cmd.opcode = 1;
+		cmd.flags = MMC_RSP_PRESENT;
+		cmd.arg = 0x69FF87A9;
+		ret = msdc_cmd(host, &cmd);
+		//sleep(10);
+	} else {
+		//sleep(1000);
+	}
+
+	//if ((ret = mmc_send_op_cond(mmc_dev)) < 0) return ret;
+	//if ((ret = mmc_startup(mmc_dev)) < 0) return ret;
+
+	return ret;
+}
