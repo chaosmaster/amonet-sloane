@@ -292,3 +292,29 @@ class Device:
             raise RuntimeError("read fail")
 
         return data
+
+    def emmc_enter_backdoor(self):
+        # magic
+        self.dev.write(p32_be(0xf00dd00d))
+        # cmd
+        self.dev.write(p32_be(0x7000))
+
+    def emmc_exit_backdoor(self):
+        # magic
+        self.dev.write(p32_be(0xf00dd00d))
+        # cmd
+        self.dev.write(p32_be(0x7001))
+
+    def emmc_read_mem(self, idx):
+        # magic
+        self.dev.write(p32_be(0xf00dd00d))
+        # cmd
+        self.dev.write(p32_be(0x7002))
+        # block to read
+        self.dev.write(p32_be(idx))
+
+        data = self.dev.read(0x200)
+        if len(data) != 0x200:
+            raise RuntimeError("read fail")
+
+        return data

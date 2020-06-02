@@ -3,6 +3,8 @@
 #include "mmc.h"
 #include "samsung_mmc.h"
 
+unsigned int msdc_cmd(struct msdc_host *host, struct mmc_command *cmd);
+
 int mmc_enter_read_ram(struct msdc_host *host) {
     int err;
     struct mmc_command cmd = { 0 };
@@ -49,7 +51,7 @@ int mmc_exit_cmd62(struct msdc_host *host) {
     return 0;
 }
 
-int dump_fw(struct msdc_host *host, int size, void *buf) {
+int _mmc_read_mem(struct msdc_host *host, int addr, int size, void *buf) {
     int err;
     int i;
     struct mmc_command cmd = { 0 };
@@ -57,7 +59,7 @@ int dump_fw(struct msdc_host *host, int size, void *buf) {
     for(i = 0; i < size; ++i) {
         cmd.opcode = MMC_ERASE_GROUP_START;
         cmd.flags = MMC_RSP_R1; //21
-        cmd.arg = FW_ADDR + i*BLOCK_SIZE;
+        cmd.arg = addr + i*BLOCK_SIZE;
         err = msdc_cmd(host, &cmd);
         if (err)
             return err;
@@ -82,4 +84,8 @@ int dump_fw(struct msdc_host *host, int size, void *buf) {
     }
     
     return 0;
+}
+
+int mmc_read_mem(struct msdc_host *host, int addr, void *buf) {
+	return _mmc_read_mem(host, addr, BLOCK_SIZE, buf);
 }

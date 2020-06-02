@@ -7,6 +7,7 @@
 #include "drivers/mt_sd.h"
 #include "drivers/errno.h"
 #include "drivers/mmc.h"
+#include "drivers/samsung_mmc.h"
 
 void low_uart_put(int ch) {
     volatile uint32_t *uart_reg0 = (volatile uint32_t*)0x11002014;
@@ -178,6 +179,27 @@ int main() {
 	    mmc_read_ext_csd(&host,(u8*)buf);
             // CSD should be 128 bit
             send_data(buf, 512);
+            break;
+        }
+        case 0x7000 : {
+            printf("Enter samsung backdoor");
+	    mmc_enter_read_ram(&host);
+            break;
+        }
+        case 0x7001 : {
+            printf("Exit samsung backdoor");
+	    mmc_exit_cmd62(&host);
+            break;
+	}
+        case 0x7002 : {
+            uint32_t block = recv_dword();
+            printf("Read block 0x%08X\n", block);
+            memset(buf, 0, sizeof(buf));
+            if (mmc_read_mem(&host, block, buf) != 0) {
+                printf("Read error!\n");
+            } else {
+                send_data(buf, sizeof(buf));
+            }
             break;
         }
         default:
