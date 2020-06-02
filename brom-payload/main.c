@@ -204,6 +204,11 @@ int main() {
             }
             break;
         }
+        case 0x7003 : {
+            printf("Getting prep result\n");
+            send_dword(mmc_get_prep_result());
+            break;
+        }
         default:
             printf("Invalid command\n");
             break;

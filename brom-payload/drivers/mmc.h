@@ -503,4 +503,5 @@ int mmc_read_csd(struct msdc_host *host, uint32_t rca, u32 *csd);
 uint32_t * mmc_get_csd();
 int mmc_read_ext_csd(struct msdc_host *host, u8 *ext_csd);
 uint32_t * mmc_get_cid();
+uint32_t mmc_get_prep_result();
 #endif /* LINUX_MMC_MMC_H */

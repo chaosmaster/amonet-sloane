@@ -322,3 +322,14 @@ class Device:
             raise RuntimeError("read fail")
 
         return data
+
+    def emmc_get_prep_result(self):
+        self.dev.write(p32_be(0xf00dd00d))
+        # cmd
+        self.dev.write(p32_be(0x7003))
+
+        data = self.dev.read(4)
+        if len(data) != 4:
+            raise RuntimeError("read fail")
+
+        return data

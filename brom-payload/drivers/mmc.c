@@ -950,6 +950,12 @@ static void derive_rpmb_key(uint8_t *in) {
     printf("\n");
 }
 
+uint32_t prep_result = 0;
+
+uint32_t mmc_get_prep_result(){
+	return prep_result;
+}
+
 int mmc_init(struct msdc_host *host) {
     int ret = 0;
 
@@ -957,6 +963,7 @@ int mmc_init(struct msdc_host *host) {
 
     ret = prepare_mmc(host, 1);
     printf("PREPARE MMC = 0x%08X\n", ret);
+    prep_result = ret;
 
     sdr_set_bits(MSDC_CFG, MSDC_CFG_PIO);
     sleepy();
