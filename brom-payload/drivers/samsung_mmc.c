@@ -78,9 +78,19 @@ int _mmc_read_mem(struct msdc_host *host, int addr, int size, void *buf) {
         if (err)
             return err;
 
-        err = mmc_read(host, i, buf + i*BLOCK_SIZE);
+        cmd.opcode = MMC_READ_SINGLE_BLOCK;
+        cmd.flags = MMC_RSP_R1;
+        cmd.arg = 0;
+    	msdc_set_blknum(host, 1);
+        err = msdc_cmd(host, &cmd);
         if (err)
             return err;
+
+	return msdc_pio_read(host, buf);
+
+        //err = mmc_read(host, i, buf + i*BLOCK_SIZE);
+        //if (err)
+        //    return err;
     }
     
     return 0;
