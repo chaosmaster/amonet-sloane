@@ -53,7 +53,7 @@ def main():
     print(ret.hex())
 
     dump_emmc_mem(dev, "emmc-brom.bin", 0, 0x10000)
-    dump_emmc_mem(dev, "emmc-fw.bin", 0x40000, 0x20000)
+    dump_emmc_mem(dev, "emmc-fw.bin", 0x40000, 0x40000)
     #####################################################################################################################################
 
     # 1) Sanity check GPT
