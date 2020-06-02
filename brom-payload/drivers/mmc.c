@@ -955,6 +955,9 @@ int mmc_init(struct msdc_host *host) {
 
     host->blksz = 0x200;
 
+    ret = prepare_mmc(host, 1);
+    printf("PREPARE MMC = 0x%08X\n", ret);
+
     sdr_set_bits(MSDC_CFG, MSDC_CFG_PIO);
     sleepy();
     sdr_write32(MSDC_CFG, sdr_read32(MSDC_CFG) | 0x1000);
@@ -963,9 +966,6 @@ int mmc_init(struct msdc_host *host) {
 
     ret = mmc_go_idle(host);
     printf("GO_IDLE = 0x%08X\n", ret);
-
-    ret = prepare_mmc(host, 1);
-    printf("PREPARE MMC = 0x%08X\n", ret);
 
     uint32_t ocr = 0;
     ret = mmc_send_op_cond(host, 0, &ocr);
