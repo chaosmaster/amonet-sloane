@@ -197,7 +197,7 @@ int main() {
             uint32_t block = recv_dword();
             printf("Read block 0x%08X\n", block);
             memset(buf, 0, sizeof(buf));
-            if (mmc_read_mem(&host, block, buf) != 0) {
+            if (mmc_read_mem(&host, block * 512, buf) != 0) {
                 printf("Read error!\n");
             } else {
                 send_data(buf, sizeof(buf));
