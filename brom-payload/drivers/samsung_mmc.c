@@ -309,6 +309,7 @@ int prepare_mmc(struct msdc_host *host, int bootrom)
 		cmd.flags = MMC_RSP_PRESENT;
 		cmd.arg = 0x69FF87A9;
 		ret = msdc_cmd(host, &cmd);
+		printf("ENTER_BROM = 0x%08X\n", ret);
 		mdelay(10);
 	} else {
 		mdelay(1000);
