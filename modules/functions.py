@@ -83,6 +83,8 @@ def dump_emmc_mem(dev, path, start_block, max_size=0):
     with open(path, "w+b") as fout:
         blocks = max_size // 0x200
         print(dev.emmc_enter_backdoor())
+        print("Prep result:")
+        print(dev.emmc_get_prep_result())
         for x in range(blocks):
             print("[{} / {}]".format(x + 1, blocks), end='\r')
             fout.write(dev.emmc_read_mem(start_block + x))

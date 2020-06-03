@@ -40,10 +40,6 @@ def main():
         minimal = True
 
     #######################################################STUFF ADDED FOR SAMSUNG MMC ##########################################################
-    print("Prep result:")
-    ret = dev.emmc_get_prep_result()
-    print(ret.hex())
-
     print("CID:")
     ret = dev.emmc_read_cid()
     print(ret.hex())

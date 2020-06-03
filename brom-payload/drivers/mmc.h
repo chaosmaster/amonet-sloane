@@ -499,6 +499,13 @@ void msdc_set_blknum(struct msdc_host *host, u32 blknum);
 int msdc_pio_read(struct msdc_host *host, void *buf);
 int msdc_pio_write(struct msdc_host* host, void *buf);
 
+
+u32 mmc_select_voltage(struct msdc_host *host, u32 ocr);
+int mmc_send_op_cond(struct msdc_host *host, u32 ocr, u32 *rocr);
+int mmc_all_send_cid(struct msdc_host *host, u32 *cid);
+int mmc_select_card(struct mmc_host *host, uint32_t rca);
+int mmc_set_relative_addr(struct msdc_host *host, uint32_t rca);
+
 int mmc_read_csd(struct msdc_host *host, uint32_t rca, u32 *csd);
 uint32_t * mmc_get_csd();
 int mmc_read_ext_csd(struct msdc_host *host, u8 *ext_csd);

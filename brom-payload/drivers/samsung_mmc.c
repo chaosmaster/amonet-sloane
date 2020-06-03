@@ -296,6 +296,14 @@ int prepare_mmc(struct msdc_host *host, int bootrom)
 	//sleep(10);
 	msdc_power(host, 1);
 	mdelay(10);
+	sdr_set_bits(MSDC_CFG, MSDC_CFG_PIO);
+	sleepy();
+	sdr_write32(MSDC_CFG, sdr_read32(MSDC_CFG) | 0x1000);
+	sleepy();
+	printf("MSDC_CFG: 0x%08X\n", sdr_read32(MSDC_CFG));
+
+	//ret = mmc_go_idle(host);
+	//printf("GO_IDLE = 0x%08X\n", ret);
 	if (bootrom) {
 		cmd.opcode = 1;
 		cmd.flags = MMC_RSP_PRESENT;
@@ -305,6 +313,27 @@ int prepare_mmc(struct msdc_host *host, int bootrom)
 	} else {
 		mdelay(1000);
 	}
+
+	uint32_t ocr = 0;
+	ret = mmc_send_op_cond(host, 0, &ocr);
+	printf("SEND_OP_COND = 0x%08X ocr = 0x%08X\n", ret, ocr);
+
+	ocr = mmc_select_voltage(host, ocr);
+	ocr |= 1 << 30;
+	printf("new ocr = 0x%08X\n", ocr);
+	uint32_t rocr = 0;
+	ret = mmc_send_op_cond(host, ocr, &rocr);
+	printf("SEND_OP_COND = 0x%08X ocr = 0x%08X\n", ret, rocr);
+
+	uint32_t cid[4] = { 0 };
+	ret = mmc_all_send_cid(host, cid);
+	printf("ALL_SEND_CID = 0x%08X cid = 0x%08X 0x%08X 0x%08X 0x%08X\n", ret, cid[0], cid[1], cid[2], cid[3]);
+
+	ret = mmc_set_relative_addr(host, 1);
+	printf("SET_RELATIVE_ADDR = 0x%08X\n", ret);
+
+	ret = mmc_select_card(host, 1);
+	printf("SELECT_CARD = 0x%08X\n", ret);
 
 	//if ((ret = mmc_send_op_cond(mmc_dev)) < 0) return ret;
 	//if ((ret = mmc_startup(mmc_dev)) < 0) return ret;

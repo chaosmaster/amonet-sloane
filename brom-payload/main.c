@@ -10,6 +10,8 @@
 #include "drivers/samsung_mmc.h"
 #include "drivers/timer.h"
 
+uint32_t prep_result = 0;
+
 void low_uart_put(int ch) {
     volatile uint32_t *uart_reg0 = (volatile uint32_t*)0x11002014;
     volatile uint32_t *uart_reg1 = (volatile uint32_t*)0x11002000;
@@ -189,6 +191,13 @@ int main() {
         }
         case 0x7000 : {
             printf("Enter samsung backdoor\n");
+
+	    ret = prepare_mmc(host, 1);
+	    printf("PREPARE MMC = 0x%08X\n", ret);
+	    prep_result = ret;
+
+	    mdelay(2000);
+
 	    int res = mmc_enter_read_ram(&host);
 	    printf("%d\n", res);
 	    send_dword(res);
@@ -212,7 +221,7 @@ int main() {
         }
         case 0x7003 : {
             printf("Getting prep result\n");
-            send_dword(mmc_get_prep_result());
+            send_dword(prep_result);
             break;
         }
         default:

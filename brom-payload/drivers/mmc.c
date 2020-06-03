@@ -16,8 +16,6 @@
 #define cpu_to_be16p be16_to_cpup
 #define cpu_to_be32p be32_to_cpup
 
-int prepare_mmc(struct msdc_host *host, int bootrom);
-
 unsigned int msdc_cmd(struct msdc_host *host, struct mmc_command *cmd);
 void sleepy(void);
 void hex_dump(const void* data, size_t size);
@@ -91,7 +89,7 @@ int mmc_send_op_cond(struct msdc_host *host, u32 ocr, u32 *rocr)
     return err;
 }
 
-static u32 mmc_select_voltage(struct msdc_host *host, u32 ocr)
+u32 mmc_select_voltage(struct msdc_host *host, u32 ocr)
 {
     int bit;
 
@@ -123,7 +121,7 @@ int mmc_set_relative_addr(struct msdc_host *host, uint32_t rca)
     return 0;
 }
 
-static int mmc_select_card(struct mmc_host *host, uint32_t rca)
+int mmc_select_card(struct mmc_host *host, uint32_t rca)
 {
     int err;
     struct mmc_command cmd = {0};
@@ -950,20 +948,10 @@ static void derive_rpmb_key(uint8_t *in) {
     printf("\n");
 }
 
-uint32_t prep_result = 0;
-
-uint32_t mmc_get_prep_result(){
-	return prep_result;
-}
-
 int mmc_init(struct msdc_host *host) {
     int ret = 0;
 
     host->blksz = 0x200;
-
-    ret = prepare_mmc(host, 1);
-    printf("PREPARE MMC = 0x%08X\n", ret);
-    prep_result = ret;
 
     sdr_set_bits(MSDC_CFG, MSDC_CFG_PIO);
     sleepy();
