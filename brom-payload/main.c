@@ -8,6 +8,7 @@
 #include "drivers/errno.h"
 #include "drivers/mmc.h"
 #include "drivers/samsung_mmc.h"
+#include "drivers/timer.h"
 
 void low_uart_put(int ch) {
     volatile uint32_t *uart_reg0 = (volatile uint32_t*)0x11002014;
@@ -52,18 +53,23 @@ void sleepy(void) {
     for (volatile int i = 0; i < 0x80000; ++i) {}
 }
 
+/*
 void mdelay (unsigned long msec)
 {
     (void)msec;
     sleepy();
 }
+*/
+
 
 /* delay usec useconds */
+/*
 void udelay (unsigned long usec)
 {
     (void)usec;
     sleepy();
 }
+*/
 
 int main() {
     char buf[0x200] = { 0 };

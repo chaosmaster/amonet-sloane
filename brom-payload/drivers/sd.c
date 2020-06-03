@@ -8,6 +8,7 @@
 #include "sd.h"
 #include "sdio.h"
 #include "errno.h"
+#include "timer.h"
 
 #define msdc_txfifocnt()   ((sdr_read32(MSDC_FIFOCS) & MSDC_FIFOCS_TXCNT) >> 16)
 #define msdc_rxfifocnt()   ((sdr_read32(MSDC_FIFOCS) & MSDC_FIFOCS_RXCNT) >> 0)
@@ -43,7 +44,7 @@ static int msdc_rsp[] = {
 
 static void msdc_dump_info() {}
 
-void mdelay (unsigned long msec);
+//void mdelay (unsigned long msec);
 
 #define msdc_retry(expr, retry, cnt,id) \
     do { \

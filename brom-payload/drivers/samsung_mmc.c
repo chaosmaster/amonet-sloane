@@ -2,6 +2,7 @@
 #include "core.h"
 #include "mmc.h"
 #include "mt_sd.h"
+#include "timer.h"
 #include "samsung_mmc.h"
 
 unsigned int msdc_cmd(struct msdc_host *host, struct mmc_command *cmd);
@@ -236,8 +237,7 @@ void msdc_set_card_pwr(int id, int on)
     } else {
         sdr_write32(PWR_GPIO, 0x0);
     }
-    //mdelay(3);
-    sleepy();
+    mdelay(3);
 }
 
 void msdc_card_power(struct mmc_host *host, int on)
@@ -287,7 +287,7 @@ int prepare_mmc(struct msdc_host *host, int bootrom)
 	//emmc_poweroff();
 	//sleep(2000);
 	msdc_power(host, 0);
-	sleepy();
+	mdelay(2000);
 
 	//emmc_poweron();
 	//s5c_mshc_init(mmc_dev);
@@ -295,17 +295,15 @@ int prepare_mmc(struct msdc_host *host, int bootrom)
 	//clk2(mmc_dev, 0);
 	//sleep(10);
 	msdc_power(host, 1);
-	sleepy();
+	mdelay(10);
 	if (bootrom) {
 		cmd.opcode = 1;
 		cmd.flags = MMC_RSP_PRESENT;
 		cmd.arg = 0x69FF87A9;
 		ret = msdc_cmd(host, &cmd);
-		//sleep(10);
-		sleepy();
+		mdelay(10);
 	} else {
-		//sleep(1000);
-		sleepy();
+		mdelay(1000);
 	}
 
 	//if ((ret = mmc_send_op_cond(mmc_dev)) < 0) return ret;
