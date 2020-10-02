@@ -129,8 +129,7 @@ def main():
     # 10) Downgrade preloader
     log("Flash preloader")
     switch_boot0(dev)
-    flash_binary(dev, "../bin/boot0short.img", 0)
-    flash_binary(dev, "../bin/preloader.bin", 520)
+    flash_binary(dev, "../bin/preloader.bin", 0)
 
     # 10.1) Wait some time so data is flushed to EMMC
     time.sleep(5)
