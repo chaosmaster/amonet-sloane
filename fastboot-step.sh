@@ -9,7 +9,8 @@ read
 fastboot flash recovery_x bin/twrp.img
 fastboot erase userdata
 #fastboot format userdata
-fastboot oem reboot-recovery
+fastboot flash MISC bin/boot-recovery.bin
+fastboot reboot
 
 echo ""
 echo ""

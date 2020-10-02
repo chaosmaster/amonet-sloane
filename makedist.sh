@@ -12,6 +12,8 @@ cp bin/{preloader.bin,lk.bin,tz.img,twrp.img,boot.hdr,boot.payload} dist/unlock/
 cp gpt/gpt-sloane-amonet.bin dist/unlock/amonet/bin/
 cp su/{minisu.img,busybox} dist/unlock/amonet/bin/
 
+echo -ne "boot-recovery\x00" > dist/unlock/amonet/bin/boot-recovery.bin
+
 mkdir -p dist/unlock/amonet/modules
 cp modules/{common.py,gpt.py,handshake.py,handshake2.py,load_payload.py,logger.py,main.py,functions.py,get_version.py} dist/unlock/amonet/modules/
 
