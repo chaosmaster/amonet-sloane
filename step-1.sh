@@ -93,5 +93,8 @@ adb shell su -c \"echo --wipe_data \> /cache/recovery/command\"
 adb shell su -c \"echo --wipe_cache \>\> /cache/recovery/command\"
 echo ""
 
+echo "Sycning"
+adb shell su -c \"sync\"
+
 echo "Rebooting into Recovery"
 adb reboot recovery

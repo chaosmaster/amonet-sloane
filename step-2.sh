@@ -105,5 +105,8 @@ adb push bin/twrp.img /data/local/tmp/
 adb shell su -c \"dd if=/data/local/tmp/twrp.img of=${PART_PREFIX}/recovery${suffix_b} bs=512\"
 echo ""
 
+echo "Sycning"
+adb shell su -c \"sync\"
+
 echo "Rebooting into TWRP"
 adb reboot recovery
