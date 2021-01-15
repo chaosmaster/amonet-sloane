@@ -102,7 +102,7 @@ fi
 
 echo "Flashing TWRP"
 adb push bin/twrp.img /data/local/tmp/
-adb shell su -c \"dd if=/data/local/tmp/twrp.img of=/dev/block/platform/soc/by-name/recovery${suffix_b} bs=512\" 
+adb shell su -c \"dd if=/data/local/tmp/twrp.img of=${PART_PREFIX}/recovery${suffix_b} bs=512\"
 echo ""
 
 echo "Rebooting into TWRP"
