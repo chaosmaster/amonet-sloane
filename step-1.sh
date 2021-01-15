@@ -62,6 +62,11 @@ if [ "$1" = "brick" ] || [ $tee_version -gt $max_tee ] || [ $lk_version -gt $max
   exit 1
 fi
 
+echo "Flashing stock recovery"
+adb push bin/recovery.img /data/local/tmp/
+adb shell su -c \"dd if=/data/local/tmp/recovery.img of=${PART_PREFIX}/recovery bs=512\" 
+echo ""
+
 echo "Your device will be reset to factory defaults..."
 echo "Press Enter to Continue..."
 read
