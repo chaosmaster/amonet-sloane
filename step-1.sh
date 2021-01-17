@@ -62,10 +62,24 @@ if [ "$1" = "brick" ] || [ $tee_version -gt $max_tee ] || [ $lk_version -gt $max
   exit 1
 fi
 
-echo "Flashing stock recovery"
-adb push bin/recovery.img /data/local/tmp/
-adb shell su -c \"dd if=/data/local/tmp/recovery.img of=${PART_PREFIX}/recovery bs=512\" 
-echo ""
+echo "Restoring stock recovery"
+adb shell su -c "./system/recovery/restore-recovery.sh" > /dev/null 2>&1
+STATUS=$(adb shell su -c \"cat /cache/recovery/log\")
+case "$STATUS" in 
+    *succeed*)
+        echo "Successfully restored recovery using restore-recovery.sh"
+    ;;
+    *failed*)
+        echo "Flashing stock recovery"
+        adb push bin/recovery.img /data/local/tmp/
+        adb shell su -c \"dd if=/data/local/tmp/recovery.img of=${PART_PREFIX}/recovery bs=512\"
+    ;;
+    *cat*)
+        echo "Stock recovery already installed"
+esac
+
+echo "Deleting temporary files"
+adb shell su -c \"rm /cache/recovery/log\" > /dev/null 2>&1
 
 echo "Your device will be reset to factory defaults..."
 echo "Press Enter to Continue..."
