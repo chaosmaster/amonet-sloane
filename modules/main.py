@@ -27,6 +27,11 @@ def main():
     # 0.2) Load brom payload
     load_payload(dev, "../brom-payload/build/payload.bin")
 
+    # Clear preloader so, we get into bootrom without shorting, should the script stall (we flash preloader as last step)
+    # 0.3) Downgrade preloader
+    log("Clear preloader header")
+    switch_boot0(dev)
+    flash_data(dev, b"EMMC_BOOT" + b"\x00" * ((0x200 * 8) - 9), 0)
 
     if len(sys.argv) == 2 and sys.argv[1] == "fixgpt":
         dev.emmc_switch(0)
@@ -84,12 +89,6 @@ def main():
     if rpmb[0:4] != b"AMZN":
         log("rpmb looks broken; if this is expected (i.e. you're retrying the exploit) press enter, otherwise terminate with Ctrl+C")
         input()
-
-    # Clear preloader so, we get into bootrom without shorting, should the script stall (we flash preloader as last step)
-    # 10) Downgrade preloader
-    log("Clear preloader header")
-    switch_boot0(dev)
-    flash_data(dev, b"EMMC_BOOT" + b"\x00" * ((0x200 * 8) - 9), 0)
 
     # 4) Zero out rpmb to enable downgrade
     log("Downgrade rpmb")
