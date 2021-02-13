@@ -24,8 +24,12 @@ def main():
     # 0.1) Handshake
     handshake(dev)
 
+    skipwait = False
+    if (len(sys.argv) == 2 and sys.argv[1] == "skipwait") or (len(sys.argv) == 3 and sys.argv[2] == "skipwait") :
+        skipwait = True
+
     # 0.2) Load brom payload
-    load_payload(dev, "../brom-payload/build/payload.bin")
+    dev = load_payload(dev, "../brom-payload/build/payload.bin", skipwait)
 
     # Clear preloader so, we get into bootrom without shorting, should the script stall (we flash preloader as last step)
     # 0.3) Downgrade preloader
